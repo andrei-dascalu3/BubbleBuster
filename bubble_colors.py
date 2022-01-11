@@ -7,6 +7,13 @@ colors = {
         'CYAN': (0, 255, 255), \
         'MAGENTA': (255, 0, 255)
         }
-        
+
+non_colors = {
+        'WHITE': (255, 255, 255),
+        'BLACK': (0, 0, 0),
+        'LIGHT_GRAY': (200, 200, 200),
+        'DARK_GRAY': (100, 100, 100)
+        }
+
 def random_color():
     return random.choice(list(colors.values()))
