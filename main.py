@@ -120,7 +120,7 @@ def draw_window(stage, shooting):
     pygame.display.update()
 
 def main():
-    global stage, counter, shooter_ball, next_ball
+    global stage, counter, shooter_ball, next_ball, start_time
     stage = 'Start'
     counter = -255
     run = True
@@ -139,6 +139,7 @@ def main():
             if stage == 'Start' and event.type == pygame.MOUSEBUTTONUP:
                 init_grid('level-1', (WIDTH/20, HEIGHT/20))
                 stage = 'InGame'
+                start_time = pygame.time.get_ticks()
             if stage == 'InGame' and event.type == pygame.MOUSEBUTTONDOWN:
                 shooting = True
             if event.type == pygame.QUIT:
@@ -149,10 +150,11 @@ def main():
 if __name__ == "__main__":
     # game settings
     pygame.init()
+    icon = pygame.image.load('Resources/logo.png').convert()
+    icon = pygame.transform.scale(icon, (32, 32))
+    pygame.display.set_icon(icon)
     clock = pygame.time.Clock()
     Bubble.surface = WIN
-    icon = pygame.image.load('Resources/logo.png').convert()
-    pygame.display.set_icon(icon)
     # background
     background = pygame.image.load('Resources/background.jpg').convert()
     background = pygame.transform.scale(background, (WIDTH, HEIGHT))

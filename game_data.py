@@ -12,7 +12,7 @@ radius = Bubble.radius
 board_width = 27 * radius
 # game data
 score = 0
-start_time = pygame.time.get_ticks()
+start_time = 0
 elapsed_time = 0
 default_pos = (15 * radius, 36 * radius)
 next_ball = Bubble(random_color(), default_pos)
