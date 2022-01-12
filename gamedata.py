@@ -1,5 +1,5 @@
-from Bubble import Bubble
 import pygame
+from Bubble import Bubble
 from bubble_colors import random_color
 
 # game settings
@@ -12,7 +12,6 @@ score = 0
 start_time = 0
 elapsed_time = 0
 # bubble data
-grid = []
 radius = Bubble.radius
 default_pos = (15 * radius, 36 * radius)
 next_ball = Bubble(random_color(), default_pos)

@@ -8,6 +8,7 @@ class Bubble:
     def __init__(self, color, pos):
         self.pos = pos
         self.color = color
+        self.is_visited = False
     
     def draw(self):
         darkened_color = tuple(a * b for a, b in zip(self.color, \
@@ -59,3 +60,27 @@ class Bubble:
            self.pos[0] >= right_bound - self.radius:
             speed = (-speed[0], speed[1])
         return speed
+
+    def is_near(self, bubble, popping=False):
+        # on same level
+        if (self.pos[0] + 2 * self.radius == bubble.pos[0] or \
+           self.pos[0] - 2 * self.radius == bubble.pos[0]) and \
+           self.pos[1] == bubble.pos[1]:
+            if popping:
+                return self.color == bubble.color
+            return True
+        # upper level
+        if (self.pos[0] + self.radius == bubble.pos[0] or \
+           self.pos[0] - self.radius == bubble.pos[0]) and \
+           self.pos[1] + 2 * self.radius == bubble.pos[1]:
+            if popping:
+                return self.color == bubble.color
+            return True
+        # lower level
+        if (self.pos[0] + self.radius == bubble.pos[0] or \
+           self.pos[0] - self.radius == bubble.pos[0]) and \
+           self.pos[1] - 2 * self.radius == bubble.pos[1]:
+            if popping:
+                return self.color == bubble.color
+            return True
+        return False

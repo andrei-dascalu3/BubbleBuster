@@ -1,4 +1,6 @@
+from os import remove
 import pygame
+from pygame import time
 from pygame.image import load
 from Bubble import Bubble
 from bubble_colors import *
@@ -6,8 +8,12 @@ from math import sqrt
 from copy import deepcopy
 from gamedata import *
 
+# the grid of bubbles
+grid = []
+
 def init_grid(seed, origin):
-    global shooter_ball
+    global shooter_ball, grid
+    grid = []
     config_file = open('GridConfigs/' + seed + '.txt', 'r')
     lines = config_file.readlines()
     odd = 1
@@ -114,6 +120,42 @@ def draw_window(stage, shooting):
         if not shooting:
             draw_arrow()
         shooter_ball.draw()
+    elif stage == 'GameWon':
+        # fade counter
+        counter += 15
+        if counter == 255:
+            counter = -255
+        msg_font = pygame.font.SysFont('Comic Sans MS', 60)
+        won = msg_font.render('You won!', True, colors['GREEN'])
+        won_rect = won.get_rect(center=(WIDTH/2, HEIGHT/2))
+        msg_font = pygame.font.SysFont('Comic Sans MS', 40)
+        text = msg_font.render('Click anywhere to start', True, colors['RED'])
+        text_rect = text.get_rect(center=(WIDTH/2, HEIGHT*6/8))
+        if counter < 0:
+            text.set_alpha(counter + 255)
+        else:
+            text.set_alpha(255 - counter)
+        WIN.blit(background, (0, 0))
+        WIN.blit(won, won_rect)
+        WIN.blit(text, text_rect)
+    elif stage == 'GameLost':
+        # fade counter
+        counter += 15
+        if counter == 255:
+            counter = -255
+        msg_font = pygame.font.SysFont('Comic Sans MS', 60)
+        won = msg_font.render('You lost!', True, colors['RED'])
+        won_rect = won.get_rect(center=(WIDTH/2, HEIGHT/2))
+        msg_font = pygame.font.SysFont('Comic Sans MS', 40)
+        text = msg_font.render('Click anywhere to restart', True, colors['RED'])
+        text_rect = text.get_rect(center=(WIDTH/2, HEIGHT*6/8))
+        if counter < 0:
+            text.set_alpha(counter + 255)
+        else:
+            text.set_alpha(255 - counter)
+        WIN.blit(background, (0, 0))
+        WIN.blit(won, won_rect)
+        WIN.blit(text, text_rect)
     pygame.display.update()
 
 def already_occupied(bubble, bubble_line):
@@ -152,27 +194,97 @@ def check_hit():
                         new_bubble.pos = (bubble.pos[0] - 2* radius,
                                           bubble.pos[1])
                 grid[i + 1].append(new_bubble)
-                return True
-    return False
+                return new_bubble
+    return None
+
+def remove_isolated(grid):
+    if len(grid) == 1:
+        return None
+    for i in range(1, len(grid)):
+        for current in grid[i]:
+            safe = False
+            for b in grid[i - 1]:
+                if current.is_near(b):
+                    safe = True
+                    break
+            if not safe:
+                grid[i].remove(current)
+        if grid[i] == []:
+            grid.remove([])
+
+def pop_bubbles(grid, start_bubble):
+    global score
+    queue = []
+    row, col = None, None
+    grid_height = len(grid)
+    for i in range(grid_height):
+        line_length = len(grid[i])
+        for j in range(line_length):
+            grid[i][j].is_visited = False
+            if grid[i][j] == start_bubble:
+                row, col = i, j
+    counter = 0
+    queue.append(grid[row][col])
+    while queue != []:
+        current = queue.pop(0)
+        for line in grid:
+            for bubble in line:
+                if current.is_near(bubble, popping=True) and not bubble.is_visited:
+                    bubble.is_visited = True
+                    counter += 1
+                    queue.append(bubble)
+    if counter >= 3:
+        for line in grid:
+            for b in line:
+                if b.is_visited:
+                    score += 10
+                    line.remove(b)
+            if line == []:
+                grid.remove(line)
+    remove_isolated(grid)
+    print(len(grid))
 
 def main():
-    global stage, counter, shooter_ball, next_ball, start_time, speed
+    global stage, counter, shooter_ball, next_ball, start_time, speed, level
+    global score
+    goals = [400, 600, 800, 1000]
+    time_limits = [60, 90, 120, 150]
     stage = 'Start'
+    level = 0
     counter = -255
     run = True
     shooting = False
     while run:
         clock.tick(FPS)
-        if shooting == True:
-            speed = shooter_ball.move(speed, board_bounds)
-            if shooter_ball.pos[1] <= board_bounds[2] + radius or check_hit():
-                shooting = False
-                shooter_ball = deepcopy(next_ball)
-                next_ball = Bubble(random_color(), default_pos)
+        if stage == 'InGame':
+            if stage == 'InGame' and \
+               score >= goals[level] and \
+               elapsed_time < time_limits[level]:
+                stage = 'GameWon'
+                level += 1
+            if stage == 'InGame' and \
+               len(grid) >= 17:
+                stage = 'GameLost'
+            if shooting == True:
+                speed = shooter_ball.move(speed, board_bounds)
+                sticked_bubble = check_hit()
+                if shooter_ball.pos[1] <= board_bounds[2] + radius or \
+                sticked_bubble is not None:
+                    # if it reaches level 0
+                    if sticked_bubble == None:
+                        x = (shooter_ball.pos[0] - board_bounds[0])// (radius * 2) \
+                            * (radius * 2) + radius + board_bounds[0]
+                        y = board_bounds[2] + radius
+                        sticked_bubble = Bubble(shooter_ball.color, (x, y))
+                        grid[0].append(sticked_bubble)
+                    shooting = False
+                    pop_bubbles(grid, sticked_bubble)
+                    shooter_ball = deepcopy(next_ball)
+                    next_ball = Bubble(random_color(), default_pos)
         for event in pygame.event.get():
             # clicked to start
             if stage == 'Start' and event.type == pygame.MOUSEBUTTONUP:
-                init_grid('level-3', (WIDTH/20, HEIGHT/20))
+                init_grid('level-' + str(level), (WIDTH/20, HEIGHT/20))
                 stage = 'InGame'
                 start_time = pygame.time.get_ticks()
             if stage == 'InGame' and event.type == pygame.MOUSEBUTTONDOWN and \
@@ -182,6 +294,16 @@ def main():
                 distx = shooter_ball.pos[0] - headx
                 disty = shooter_ball.pos[1] - heady
                 speed = (distx, disty)
+            if stage == 'GameWon' and event.type == pygame.MOUSEBUTTONDOWN:
+                init_grid('level-' + str(level), (WIDTH/20, HEIGHT/20))
+                stage = 'InGame'
+                start_time = pygame.time.get_ticks()
+                score = 0
+            if stage == 'GameLost' and event.type == pygame.MOUSEBUTTONDOWN:
+                init_grid('level-' + str(level), (WIDTH/20, HEIGHT/20))
+                stage = 'InGame'
+                start_time = pygame.time.get_ticks()
+                score = 0
             if event.type == pygame.QUIT:
                 run = False
         draw_window(stage, shooting)
