@@ -325,8 +325,8 @@ def remove_isolated(grid):
                     break
             if not safe:
                 grid[i].remove(current)
-        if grid[i] == []:
-            grid.remove([])
+    while [] in grid:
+        grid.remove([])
 
 def pop_bubbles(grid, start_bubble):
     '''
@@ -402,7 +402,8 @@ def main():
                 stage = 'GameWon'
                 level += 1
             if stage == 'InGame' and \
-               len(grid) >= 17:
+               (len(grid) >= 17 or
+               elapsed_time >= time_limits[level]):
                 stage = 'GameLost'
             if shooting == True:
                 speed = shooter_ball.move(speed, board_bounds)
@@ -411,7 +412,7 @@ def main():
                 sticked_bubble is not None:
                     # if it reaches level 0
                     if sticked_bubble == None:
-                        x = (shooter_ball.pos[0] - board_bounds[0])// (radius * 2) \
+                        x = (shooter_ball.pos[0]-board_bounds[0])//(radius*2) \
                             * (radius * 2) + radius + board_bounds[0]
                         y = board_bounds[2] + radius
                         sticked_bubble = Bubble(shooter_ball.color, (x, y))
