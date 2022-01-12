@@ -363,10 +363,15 @@ def pop_bubbles(grid, start_bubble):
                     queue.append(bubble)
     if counter >= 3:
         for line in grid:
-            for b in line:
-                if b.is_visited:
-                    score += 10
-                    line.remove(b)
+            found = True
+            while found:
+                found = False
+                for b in line:
+                    if b.is_visited:
+                        found = True
+                        score += 10
+                        line.remove(b)
+                        break
             if line == []:
                 grid.remove(line)
     remove_isolated(grid)
