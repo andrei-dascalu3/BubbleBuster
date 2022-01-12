@@ -370,7 +370,6 @@ def pop_bubbles(grid, start_bubble):
             if line == []:
                 grid.remove(line)
     remove_isolated(grid)
-    print(len(grid))
 
 def main():
     '''
@@ -405,6 +404,7 @@ def main():
                (len(grid) >= 17 or
                elapsed_time >= time_limits[level]):
                 stage = 'GameLost'
+                level = 0
             if shooting == True:
                 speed = shooter_ball.move(speed, board_bounds)
                 sticked_bubble = check_hit()
