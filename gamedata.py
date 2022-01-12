@@ -2,6 +2,10 @@ import pygame
 from Bubble import Bubble
 from bubble_colors import random_color
 
+'''
+Global variables used across the game.
+Variables used in initialization, game data, etc.
+'''
 # game settings
 WIDTH, HEIGHT = 800, 760
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))

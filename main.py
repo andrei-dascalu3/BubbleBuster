@@ -12,6 +12,18 @@ from gamedata import *
 grid = []
 
 def init_grid(seed, origin):
+    '''
+    Initializes grid of bubbles according to configuration file.
+
+    Parameters:
+        seed: string
+            Path to a config file with grid representation.
+        origin: tuple of int
+            Coordinates of the up-right corner of the grid
+    
+    Returns:
+        None
+    '''
     global shooter_ball, grid
     grid = []
     config_file = open('GridConfigs/' + seed + '.txt', 'r')
@@ -35,6 +47,15 @@ def init_grid(seed, origin):
     shooter_ball = Bubble(random_color(), default_pos)
 
 def draw_board():
+    '''
+    Draws the backboard of the grid of bubbles.
+
+    Parameters:
+        None
+
+    Returns:
+        None
+    '''
     global board
     board = pygame.Surface((board_width, HEIGHT))
     board.set_alpha(200)
@@ -45,12 +66,41 @@ def draw_board():
     pygame.draw.rect(WIN, non_colors['BLACK'], upper_rect)
 
 def draw_info_text(color, msg_font, msg, origin, width, lines):
+    '''
+    Draws a given message at a certain position.
+    Used for the game data displayed.
+
+    Parameters:
+        msg_font: pygame.font.SysFont()
+            Message font.
+        msg: string
+            Message to be displayed.
+        origin: tuple of int
+            Coordinates of the up-right of the text box.
+        width: int
+            Width of the text box.
+        lines: int
+            Used to determine Y coordinate of the text box.
+
+    Returns:
+        None
+    '''
     text = msg_font.render(msg, True, color)
     text_rect = text.get_rect(center=(origin[0] + width / 2, origin[1] + radius\
          * lines))
     WIN.blit(text, text_rect)
 
 def draw_info():
+    '''
+    Draws info texts on the right panel during game.
+    (Score, time elapsed, next bubble)
+
+    Parameters:
+        None
+
+    Returns:
+        None
+    '''
     info_board_width = 9 * radius
     info_board = pygame.Surface((info_board_width, HEIGHT))
     info_board.set_alpha(200)
@@ -82,15 +132,45 @@ def draw_info():
     dummy_ball.draw()
 
 def draw_grid():
+    '''
+    Draws the grid of bubbles. Special positioning is followed.
+
+    Parameters:
+        None
+        
+    Returns:
+        None
+    '''
     for level in grid:
         for ball in level:
             ball.draw()
 
 def draw_arrow():
+    '''
+    Draws the arrow indicating throwing bubble direction.
+
+    Parameters:
+        None
+        
+    Returns:
+        None
+    '''
     pygame.draw.line(WIN, non_colors['BLACK'], (shooter_ball.pos),\
                      shooter_ball.arrow_coord(), width = 2)
 
 def draw_window(stage, shooting):
+    '''
+    Draws the entire window of the current game stage
+
+    Parameters:
+        stage: string
+            Can be 'Start', 'InGame', 'GameWon', 'GameLost'.
+        shooting: bool
+            To check if the shooting bubble is currently moving.
+        
+    Returns:
+        None
+    '''
     global board, counter, elapsed_time
     if stage == 'Start':
         # fade counter
@@ -159,12 +239,38 @@ def draw_window(stage, shooting):
     pygame.display.update()
 
 def already_occupied(bubble, bubble_line):
+    '''
+    Checks if a bubble is already drawn at the position below.
+    Not to overlap bubbles.
+
+    Parameters:
+        bubble: Bubble
+            Bubble to be drawn.
+        bubble_line: list of Bubble
+            Line of checked bubbles.
+        
+    Returns:
+        bool
+    '''
     for b in bubble_line:
         if bubble.pos == b.pos:
             return True
     return False
 
 def check_hit():
+    '''
+    Checks if the thrown bubble hit a bubble in the grid.
+    If it does, it is inserted in the grid at the arriving position.
+
+    Parameters:
+        None
+        
+    Returns:
+        Bubble 
+            The inserted bubble.
+        or None
+            If the upper limit is reached.
+    '''
     global board_bounds
     grid_height = len(grid)
     for i in range(grid_height - 1, -1, -1):
@@ -198,6 +304,16 @@ def check_hit():
     return None
 
 def remove_isolated(grid):
+    '''
+    Removes the isolated bubbles after the bursting of the ones with the same \
+    color.
+
+    Parameters:
+        grid: matrix of Bubble
+        
+    Returns:
+        None
+    '''
     if len(grid) == 1:
         return None
     for i in range(1, len(grid)):
@@ -213,6 +329,18 @@ def remove_isolated(grid):
             grid.remove([])
 
 def pop_bubbles(grid, start_bubble):
+    '''
+    Removes the bubbles neighbouring the shot bubble.
+    The popped bubbles must share the same color.
+
+    Parameters:
+        grid: matrix of Bubble
+        start_bubble: Bubble
+            The just shot bubble.
+        
+    Returns:
+        None
+    '''
     global score
     queue = []
     row, col = None, None
@@ -245,6 +373,17 @@ def pop_bubbles(grid, start_bubble):
     print(len(grid))
 
 def main():
+    '''
+    The main function.
+    It includes the managing of the game stages, game data, event managing, \
+    game initialization.
+
+    Parameters:
+        None
+        
+    Returns:
+        None
+    '''
     global stage, counter, shooter_ball, next_ball, start_time, speed, level
     global score
     goals = [400, 600, 800, 1000]

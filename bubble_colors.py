@@ -1,4 +1,7 @@
 import random
+'''
+Dictionaries of colors used in drawing operations.
+'''
 colors = {
         'RED': (255, 0, 0), \
         'GREEN': (0, 255, 0), \
@@ -16,4 +19,13 @@ non_colors = {
         }
 
 def random_color():
-    return random.choice(list(colors.values()))
+   '''
+   Returns a random color from the custom dictionary.
+
+   Parameters:
+        None
+
+   Returns:
+        tuple: Color chosen
+   '''
+   return random.choice(list(colors.values()))
